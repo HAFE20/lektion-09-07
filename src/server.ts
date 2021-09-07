@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
+// LocalStrategy == inloggning med användarnamn och lösenord
 
 // Konfigurera servern
 const app = express()
@@ -24,6 +25,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Inställningar för passport
+// Serialisering motsvarar JSON.parse och JSON.stringify
 passport.serializeUser((user: User, done: any) => {
 	// omvandla användare till ett id, som används med session cookie
   done(null, user.id);
@@ -80,10 +82,18 @@ app.get('/', (req: any, res: any) => {
 	}
 })
 
-app.post('/login', (req: any, res: any) => {
+app.post('/login',
+	passport.authenticate('local', {
+		successRedirect: '/',
+		failureRedirect: '/login-failed',
+		failureFlash: false
+	})
+);
 
-})
-
+app.get('/logout', (req: any, res: any) => {
+  req.logout();  // passport skapar logout-funktionen
+  res.redirect('/');
+});
 
 
 // Starta servern
